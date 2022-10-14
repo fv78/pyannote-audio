@@ -264,9 +264,9 @@ class Model(pl.LightningModule):
     ):
         super().__init__()
 
-        assert (
-            num_channels == 1
-        ), "Only mono audio is supported for now (num_channels = 1)"
+        #assert (
+        #    num_channels == 1
+        #), "Only mono audio is supported for now (num_channels = 1)"
 
         self.save_hyperparameters("sample_rate", "num_channels")
 

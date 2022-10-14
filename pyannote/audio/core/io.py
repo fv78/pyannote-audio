@@ -289,6 +289,7 @@ class Audio:
         file: AudioFile,
         segment: Segment,
         duration: Optional[float] = None,
+        channels_first = False,
         mode="raise",
     ) -> Tuple[Tensor, int]:
         """Fast version of self(file).crop(segment, **kwargs)
@@ -382,10 +383,11 @@ class Audio:
         else:
             try:
                 data, _ = torchaudio.load(
-                    file["audio"], frame_offset=start_frame, num_frames=num_frames
+                    file["audio"], frame_offset=start_frame, num_frames=num_frames, channels_first=channels_first
                 )
                 if isinstance(file["audio"], IOBase):
                     file["audio"].seek(0)
+                return data, sample_rate
             except RuntimeError:
 
                 if isinstance(file["audio"], IOBase):

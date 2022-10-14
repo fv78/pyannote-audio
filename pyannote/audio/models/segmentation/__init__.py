@@ -21,5 +21,6 @@
 # SOFTWARE.
 
 from .PyanNet import PyanNet
+from .StereoSyncNet import StereoSyncNet
 
-__all__ = ["PyanNet"]
+__all__ = ["PyanNet", "StereoSyncNet"]

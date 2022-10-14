@@ -168,7 +168,8 @@ class SegmentationTaskMixin:
 
         # read (and resample if needed) audio chunk
         duration = duration or self.duration
-        sample["X"], _ = self.model.audio.crop(file, chunk, duration=duration)
+        sample["X"], _ = self.model.audio.crop(file, chunk, duration=duration, channels_first=False)
+        sample["X"] = torch.transpose(sample["X"], 0, 1)
 
         # use model introspection to predict how many frames it will output
         num_samples = sample["X"].shape[1]
@@ -323,12 +324,12 @@ class SegmentationTaskMixin:
         # apply augmentation (only in "train" stage)
         self.augmentation.train(mode=(stage == "train"))
         augmented = self.augmentation(
-            samples=collated_X,
+            samples=collated_X[:,0:2,:],
             sample_rate=self.model.hparams.sample_rate,
-            targets=collated_y.unsqueeze(1),
+            targets=collated_y.unsqueeze(1).repeat(1, 2, 1, 1),
         )
 
-        return {"X": augmented.samples, "y": self.adapt_y(augmented.targets.squeeze(1))}
+        return {"X": augmented.samples, "y": self.adapt_y(augmented.targets[:,1,:,:].squeeze(1))}
 
     def train__len__(self):
         # Number of training samples in one epoch
