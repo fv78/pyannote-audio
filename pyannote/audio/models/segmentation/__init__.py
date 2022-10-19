@@ -23,6 +23,8 @@
 from .PyanNet import PyanNet
 from .StereoSyncNet import StereoSyncNet
 from .StereoSyncNet_IPD import StereoSyncNet_IPD
+from .StereoSyncNet_IPD_ILD import StereoSyncNet_IPD_ILD
 
 
-__all__ = ["PyanNet", "StereoSyncNet", "StereoSyncNet_IPD"]
+
+__all__ = ["PyanNet", "StereoSyncNet", "StereoSyncNet_IPD", "StereoSyncNet_IPD_ILD"]
