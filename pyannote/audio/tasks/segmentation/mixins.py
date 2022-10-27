@@ -49,6 +49,9 @@ class SegmentationTaskMixin:
 
         self._train = []
         self._train_metadata = dict()
+        self._validation_generator = torch.Generator()
+
+        self._validation_generator.manual_seed(2147483647)
 
         for f in self.protocol.train():
 
@@ -141,6 +144,7 @@ class SegmentationTaskMixin:
         file: AudioFile,
         chunk: Segment,
         duration: float = None,
+        generator: Optional[torch.Generator] = None
     ) -> dict:
         """Extract audio chunk and corresponding frame-wise labels
 
@@ -175,6 +179,12 @@ class SegmentationTaskMixin:
         num_samples = sample["X"].shape[1]
         num_frames, _ = self.model.introspection(num_samples)
         resolution = duration / num_frames
+
+        ##random permute
+        channel_permutation = torch.randperm(7, generator=generator)
+        ch1 = sample["X"][channel_permutation[0],:].unsqueeze(0)
+        ch2 = sample["X"][channel_permutation[1],:].unsqueeze(0)
+        sample["X"] = torch.cat((ch1, ch2))
 
         # discretize annotation, using model resolution
         sample["y"] = file["annotation"].discretize(
@@ -230,7 +240,7 @@ class SegmentationTaskMixin:
             start_time = rng.uniform(segment.start, segment.end - self.duration)
             chunk = Segment(start_time, start_time + self.duration)
 
-            yield self.prepare_chunk(file, chunk, duration=self.duration)
+            yield self.prepare_chunk(file, chunk, duration=self.duration, generator=None)
 
     def train__iter__(self):
         """Iterate over training samples
@@ -338,10 +348,14 @@ class SegmentationTaskMixin:
 
     def val__getitem__(self, idx):
         f, chunk = self._validation[idx]
-        return self.prepare_chunk(f, chunk, duration=self.duration)
+        return self.prepare_chunk(f, chunk, duration=self.duration, generator=self._validation_generator)
 
     def val__len__(self):
         return len(self._validation)
+
+    def validation_epoch_end(self, outputs):
+        self._validation_generator.manual_seed(2147483647)
+        pass
 
     def validation_step(self, batch, batch_idx: int):
         """Compute validation area under the ROC curve

@@ -193,6 +193,13 @@ class StereoSyncNet_IPD(Model):
        
         stereo_channel2 = waveforms[:, 1, :].unsqueeze(1)
    
+        '''
+        if waveforms.shape[1] == 2:
+            stereo_channel2 = waveforms[:, 1, :].unsqueeze(1)
+        else :
+            stereo_channel1 = waveforms[:, 7, :].unsqueeze(1)
+            stereo_channel2 = waveforms[:, 7, :].unsqueeze(1)
+        '''
         ##IPD
         
         normalized_input1 = self.wav_norm1d(stereo_channel1)
@@ -217,7 +224,9 @@ class StereoSyncNet_IPD(Model):
             ipd = F.leaky_relu(norm1d(pool1d(conv1d(ipd))))#[1, 60, 276]
             ild = F.leaky_relu(norm1d(pool1d(conv1d(ild))))
 
-
+        ### something bad is appening here
+        ipd = torch.nan_to_num(ipd)
+        assert not (torch.isnan(ipd).any())
         ####
 
         output1_sincnet = self.sincnet(stereo_channel1)
