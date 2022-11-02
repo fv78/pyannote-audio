@@ -181,7 +181,8 @@ class SegmentationTaskMixin:
         resolution = duration / num_frames
 
         ##random permute
-        channel_permutation = torch.randperm(7, generator=generator)
+        #channel_permutation = torch.randperm(7, generator=generator)
+        channel_permutation = torch.randint(low=0, high=8, size = (2,), generator=generator)
         ch1 = sample["X"][channel_permutation[0],:].unsqueeze(0)
         ch2 = sample["X"][channel_permutation[1],:].unsqueeze(0)
         sample["X"] = torch.cat((ch1, ch2))
